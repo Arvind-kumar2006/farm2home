@@ -3,28 +3,33 @@ const Product = require('../Models/Product');
 
 const createOrder = async (req, res) => {
   try {
-    const { items, deliveryType } = req.body;
+    const { items, totalPrice, deliveryType } = req.body;
 
-    // Calculate total price
-    let totalPrice = 0;
-    for (const item of items) {
-      const product = await Product.findById(item.product);
-      if (!product) return res.status(404).json({ message: 'Product not found' });
-
-      totalPrice += product.price * item.quantity;
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: 'No items in order' });
     }
+
+    // Get the first product from the list to determine the farmer
+    const firstProduct = await Product.findById(items[0].product);
+    if (!firstProduct) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+
+    const farmerId = firstProduct.farmer;
 
     const order = new Order({
       customer: req.user._id,
       items,
+      totalPrice,
       deliveryType,
-      totalPrice
+      farmer: farmerId
     });
 
     await order.save();
-    res.status(201).json({ message: 'Order placed successfully', order });
+    res.status(201).json(order);
   } catch (error) {
-    res.status(500).json({ error: 'Order creation failed' });
+    console.error('Error creating order:', error);
+    res.status(500).json({ message: 'Failed to create order' });
   }
 };
 
@@ -44,7 +49,7 @@ const getUserOrders = async (req, res) => {
 // FARMER: View all orders
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find()
+    const orders = await Order.find({ farmer: req.user._id }) 
       .populate('customer', 'name email')
       .populate('items.product', 'name price')
       .sort({ createdAt: -1 });

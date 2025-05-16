@@ -5,7 +5,7 @@ const {createOrder, getUserOrders,getAllOrders,updateOrderStatus} = require('../
 
 const { authenticateUser, authorizeRoles } = require('../middleware/authMiddleware');
 
-router.post('/', authenticateUser, authorizeRoles('customer'), createOrder);
+router.post('/', authenticateUser, createOrder);
 router.get('/my-orders', authenticateUser, authorizeRoles('customer'), getUserOrders);
 
 

@@ -27,6 +27,11 @@ const orderSchema = new mongoose.Schema({
   orderDate: {
     type: Date,
     default: Date.now
+  },
+  farmer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, { timestamps: true });
 

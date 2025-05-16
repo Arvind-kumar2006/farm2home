@@ -30,7 +30,7 @@ const Login = () => {
       if(user.role === 'farmer') {
         navigate('/FarmerDashboard');
       } else {
-        navigate('/'); // or other route for customers
+        navigate('/CustomerDashboard'); // or other route for customers
       }
     } catch (error) {
       alert(error.response?.data?.message || 'Login failed');
