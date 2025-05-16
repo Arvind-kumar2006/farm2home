@@ -1,56 +1,34 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "../styles/FarmerDashboard.css";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const FarmerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
-    name: "",
-    price: "",
-    quantity: "",
-    description: "",
-    image: "",
-    category: ""
+    name: '',
+    description: '',
+    price: '',
+    quantity: '',
+    image: '',
+    category: '',
   });
-  const [editingId, setEditingId] = useState(null);
-  const [farmerId, setFarmerId] = useState(null);
 
-  const backendUrl = "http://localhost:8000/api";
-
-  const fetchFarmerInfo = async () => {
-    try {
-      const res = await axios.get(`${backendUrl}/auth/me`, {
-        withCredentials: true,
-      });
-      setFarmerId(res.data._id);
-    } catch (error) {
-      console.error("Failed to fetch farmer info", error);
-    }
-  };
+  const token = localStorage.getItem('token');
 
   const fetchProducts = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/products`, {
-        withCredentials: true,
+      const res = await axios.get('http://localhost:8000/api/products/my-products', {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const filtered = res.data.filter(
-        (product) => product.createdBy === farmerId
-      );
-      setProducts(filtered);
-    } catch (error) {
-      console.error("Failed to fetch products", error);
+      console.log('Fetched Products:', res.data);
+      setProducts(res.data.products);
+    } catch (err) {
+      console.error('Fetch error:', err);
     }
   };
 
   useEffect(() => {
-    fetchFarmerInfo();
+    fetchProducts();
   }, []);
-
-  useEffect(() => {
-    if (farmerId) {
-      fetchProducts();
-    }
-  }, [farmerId]);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -58,163 +36,114 @@ const FarmerDashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      if (editingId) {
-        await axios.put(
-          `${backendUrl}/products/${editingId}`,
-          form,
-          { withCredentials: true }
-        );
-      } else {
-        await axios.post(
-          `${backendUrl}/products`,
-          form,
-          { withCredentials: true }
-        );
-      }
-      setForm({
-        name: "",
-        price: "",
-        quantity: "",
-        description: "",
-        image: "",
-        category: ""
-      });
-      setEditingId(null);
-      fetchProducts();
-    } catch (error) {
-      console.error("Error submitting product:", error);
-    }
-  };
 
-  const handleEdit = (product) => {
-    setForm({
-      name: product.name,
-      price: product.price,
-      quantity: product.quantity,
-      description: product.description || "",
-      image: product.image || "",
-      category: product.category || ""
-    });
-    setEditingId(product._id);
-  };
-
-  const handleDelete = async (id) => {
     try {
-      await axios.delete(`${backendUrl}/products/${id}`, {
-        withCredentials: true,
+      await axios.post('http://localhost:8000/api/products', form, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+      alert('Product added!');
+      setForm({ name: '', description: '', price: '', quantity: '', image: '', category: '' });
       fetchProducts();
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    } catch (err) {
+      console.error('Create error:', err);
+      alert('Error creating product.');
     }
   };
 
   return (
-    <div className="dashboard-container">
-      <h1 className="dashboard-title">Farmer Dashboard</h1>
-
-      <div className="form-container">
-        <h2>{editingId ? "Edit Product" : "Add New Product"}</h2>
-        <form onSubmit={handleSubmit} className="product-form">
+    <div className="container mx-auto p-6 max-w-2xl">
+      <div className="bg-white rounded shadow p-6 mb-8">
+        <h2 className="text-xl font-semibold mb-4">Create Product</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
             name="name"
-            placeholder="Product Name"
             value={form.name}
             onChange={handleChange}
             required
+            placeholder="Name"
+            className="w-full border p-2 rounded"
           />
           <textarea
             name="description"
-            placeholder="Description"
             value={form.description}
             onChange={handleChange}
-            rows={3}
+            placeholder="Description"
+            className="w-full border p-2 rounded"
           />
-          <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            value={form.price}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="number"
-            name="quantity"
-            placeholder="Quantity"
-            value={form.quantity}
-            onChange={handleChange}
-            required
-          />
+          <div className="flex space-x-4">
+            <input
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              required
+              placeholder="Price*"
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="number"
+              name="quantity"
+              value={form.quantity}
+              onChange={handleChange}
+              required
+              placeholder="Quantity"
+              className="w-full border p-2 rounded"
+            />
+          </div>
           <input
             type="text"
             name="image"
-            placeholder="Image URL"
             value={form.image}
             onChange={handleChange}
+            placeholder="Image URL"
+            className="w-full border p-2 rounded"
           />
           <input
             type="text"
             name="category"
-            placeholder="Category"
             value={form.category}
             onChange={handleChange}
+            placeholder="Category"
+            className="w-full border p-2 rounded"
           />
-          <button type="submit">
-            {editingId ? "Update Product" : "Add Product"}
+          <button
+            type="submit"
+            className="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700"
+          >
+            Submit Product
           </button>
         </form>
       </div>
 
-      <div className="products-container">
-        <h2>Your Products</h2>
+      <div className="bg-white rounded shadow p-6">
+        <h2 className="text-xl font-semibold mb-4">Your Products</h2>
         {products.length === 0 ? (
-          <p>No products found.</p>
+          <p className="text-gray-500">No products added yet.</p>
         ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Description</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Category</th>
-                <th>Image</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {products.map((product) => (
-                <tr key={product._id}>
-                  <td>{product.name}</td>
-                  <td>{product.description}</td>
-                  <td>{product.price}</td>
-                  <td>{product.quantity}</td>
-                  <td>{product.category}</td>
-                  <td>
-                    {product.image && (
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="product-image"
-                      />
-                    )}
-                  </td>
-                  <td>
-                    <button onClick={() => handleEdit(product)}>Edit</button>
-                    <button
-                      onClick={() => handleDelete(product._id)}
-                      className="delete-button"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <ul className="space-y-4">
+            {products.map((prod) => (
+              <li
+                key={prod._id}
+                className="bg-green-50 p-4 rounded flex justify-between items-center"
+              >
+                <div>
+                  <strong>{prod.name}</strong>, {prod.category}<br />
+                  ₹ {prod.price} × {prod.quantity}<br />
+                  Quantity: {prod.quantity}
+                </div>
+                <img
+                  src={prod.image || 'https://placehold.co/80x80'}
+                  alt={prod.name}
+                  className="w-20 h-20 object-cover rounded"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = 'https://placehold.co/80x80';
+                  }}
+                />
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>

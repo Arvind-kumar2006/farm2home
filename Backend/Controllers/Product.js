@@ -65,10 +65,21 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+
+const getFarmerProducts = async (req, res) => {
+  try {
+    const products = await Product.find({createdBy: req.user._id});
+    res.status(200).json({ products });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch your products' });
+  }
+};
+
 module.exports = {
   createProduct,
   getAllProducts,
   getProductById,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getFarmerProducts
 };
