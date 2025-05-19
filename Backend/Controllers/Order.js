@@ -1,6 +1,7 @@
 const Order = require('../Models/Order');
 const Product = require('../Models/Product');
-// filepath: /Users/arvindkumar/Desktop/untitled folder/Backend/Controllers/Order.js
+
+// Create Order
 const createOrder = async (req, res) => {
   try {
     const { items, totalPrice, deliveryType } = req.body;
@@ -10,12 +11,12 @@ const createOrder = async (req, res) => {
     }
 
     // Validate and fetch the farmer from the first product
-    const firstProduct = await Product.findById(items[0].product).populate('farmer');
+    const firstProduct = await Product.findById(items[0].product).populate('createdBy');
     if (!firstProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const farmerId = firstProduct.farmer._id;
+    const farmerId = firstProduct.createdBy._id;
 
     const order = new Order({
       customer: req.user._id,
@@ -33,7 +34,7 @@ const createOrder = async (req, res) => {
   }
 };
 
-// CUSTOMER: View own orders
+// Get Customer Orders
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ customer: req.user._id })
@@ -46,10 +47,10 @@ const getUserOrders = async (req, res) => {
   }
 };
 
-// FARMER: View all orders
+// Get Farmer Orders
 const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ farmer: req.user._id }) 
+    const orders = await Order.find({ farmer: req.user._id })
       .populate('customer', 'name email')
       .populate('items.product', 'name price')
       .sort({ createdAt: -1 });
@@ -60,7 +61,7 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-// FARMER: Update order status
+// Update Order Status
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -77,7 +78,4 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-
-
-
-module.exports = {createOrder, getUserOrders, getAllOrders, updateOrderStatus};
+module.exports = { createOrder, getUserOrders, getAllOrders, updateOrderStatus };
