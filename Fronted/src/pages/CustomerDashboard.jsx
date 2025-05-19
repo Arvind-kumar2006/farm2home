@@ -1,27 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-
+import '../styles/ CustomerDashboard.css'; 
 const CustomerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [orderForm, setOrderForm] = useState({ quantity: 1, deliveryType: 'Delivery' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
+        setLoading(true);
         const res = await axios.get('http://localhost:8000/api/products');
         setProducts(res.data.products || []);
+        setLoading(false);
       } catch (err) {
         console.error('Error fetching all products:', err);
-        setError('⚠️ Failed to load products. Please try again later.');
+        setError(' Failed to load products. Please try again later.');
+        setLoading(false);
       }
     };
 
     fetchAllProducts();
   }, []);
 
+ 
   const handleOrderClick = (product) => {
     setSelectedProduct(product);
     setOrderForm({ quantity: 1, deliveryType: 'Delivery' });
@@ -29,20 +35,21 @@ const CustomerDashboard = () => {
     setError('');
   };
 
+  // Handle order submission
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
     if (!selectedProduct) return;
 
     const quantity = Number(orderForm.quantity);
     if (quantity < 1) {
-      setError('❌ Quantity must be at least 1.');
+      setError('Quantity must be at least 1.');
       return;
     }
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setError('⚠️ Please log in to place an order.');
+        setError('Please log in to place an order.');
         return;
       }
 
@@ -55,17 +62,20 @@ const CustomerDashboard = () => {
         deliveryType: orderForm.deliveryType,
       };
 
-      await axios.post('http://localhost:8000/api/orders', payload, config);
+      console.log('Payload:', payload); 
+      const response = await axios.post('http://localhost:8000/api/orders', payload, config);
+      console.log('Response:', response.data);
 
-      setMessage('✅ Order placed successfully!');
+      setMessage('Order placed successfully!');
       setSelectedProduct(null);
       setOrderForm({ quantity: 1, deliveryType: 'Delivery' });
     } catch (err) {
       console.error('Order Error:', err?.response?.data || err);
-      setError(err?.response?.data?.message || '❌ Could not place order. Try again later.');
+      setError(err?.response?.data?.message || 'Could not place order. Try again later.');
     }
   };
 
+  
   const handleOverlayClick = (e) => {
     if (e.target.id === 'orderModalOverlay') {
       setSelectedProduct(null);
@@ -73,34 +83,29 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h2 className="text-3xl font-bold text-center mb-6">All Available Farmer Products</h2>
+    <div className="container">
+      <h2 className="heading">All Available Farmer Products</h2>
 
-      {message && <div className="text-center text-green-600 mb-4">{message}</div>}
-      {error && <div className="text-center text-red-600 mb-4">{error}</div>}
+      {message && <div className="message-success">{message}</div>}
+      {error && <div className="message-error">{error}</div>}
 
-      {products.length === 0 ? (
-        <p className="text-center text-gray-500">No products available at the moment.</p>
+      {loading ? (
+        <p className="loading">Loading products...</p>
+      ) : products.length === 0 ? (
+        <p className="no-products">No products available at the moment.</p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="products-grid">
           {products.map((prod) => (
-            <div key={prod._id} className="border rounded-lg p-4 shadow bg-white">
+            <div key={prod._id} className="product-card">
               {prod.image && (
-                <img
-                  src={prod.image}
-                  alt={prod.name}
-                  className="w-full h-40 object-cover rounded mb-3"
-                />
+                <img src={prod.image} alt={prod.name} className="product-img" />
               )}
-              <h3 className="text-lg font-semibold mb-1">{prod.name}</h3>
-              <p className="text-gray-600 text-sm mb-1">Category: {prod.category}</p>
-              <p className="text-sm text-gray-700 mb-1">{prod.description}</p>
-              <p className="font-medium text-green-700">₹ {prod.price}</p>
-              <p className="text-sm text-gray-500">Available: {prod.quantity}</p>
-              <button
-                onClick={() => handleOrderClick(prod)}
-                className="mt-3 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-              >
+              <h3 className="product-name">{prod.name}</h3>
+              <p className="product-category">Category: {prod.category}</p>
+              <p className="product-desc">{prod.description}</p>
+              <p className="product-price">₹ {prod.price}</p>
+              <p className="product-available">Available: {prod.quantity}</p>
+              <button onClick={() => handleOrderClick(prod)} className="order-btn">
                 Order Now
               </button>
             </div>
@@ -108,18 +113,18 @@ const CustomerDashboard = () => {
         </div>
       )}
 
-      {/* Modal */}
+    
       {selectedProduct && (
         <div
           id="orderModalOverlay"
-          className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50"
+          className="modal-overlay"
           onClick={handleOverlayClick}
         >
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h3 className="text-xl font-bold mb-4">Order: {selectedProduct.name}</h3>
+          <div className="modal-content">
+            <h3 className="modal-title">Order: {selectedProduct.name}</h3>
 
-            <form onSubmit={handleOrderSubmit}>
-              <label className="block mb-3">
+            <form onSubmit={handleOrderSubmit} className="modal-form">
+              <label>
                 Quantity:
                 <input
                   type="number"
@@ -128,39 +133,26 @@ const CustomerDashboard = () => {
                   onChange={(e) =>
                     setOrderForm({ ...orderForm, quantity: Number(e.target.value) })
                   }
-                  className="w-full p-2 mt-1 border border-gray-300 rounded"
                   required
                 />
               </label>
 
-              <label className="block mb-4">
+              <label>
                 Delivery Type:
                 <select
                   value={orderForm.deliveryType}
                   onChange={(e) =>
                     setOrderForm({ ...orderForm, deliveryType: e.target.value })
                   }
-                  className="w-full p-2 mt-1 border border-gray-300 rounded"
                 >
                   <option value="Delivery">Delivery</option>
                   <option value="Pickup">Pickup</option>
                 </select>
               </label>
 
-              <div className="flex justify-between">
-                <button
-                  type="submit"
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                >
-                  Place Order
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedProduct(null)}
-                  className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                  Cancel
-                </button>
+              <div className="modal-actions">
+                <button type="submit" className="modal-submit">Place Order</button>
+                <button type="button" onClick={() => setSelectedProduct(null)} className="modal-cancel">Cancel</button>
               </div>
             </form>
           </div>

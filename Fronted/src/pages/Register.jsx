@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link,useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../App.css'
+import '../styles/Register.css';
+
 const Register = () => {
   const [role, setRole] = useState('customer');
   const [name, setName] = useState('');
@@ -44,26 +45,23 @@ const Register = () => {
   };
 
   return (
-    <div className="flex h-screen">
-      {/* Left image section */}
-      <div className="w-1/2 bg-gradient-to-br from-green-200 to-green-500 flex items-center justify-center">
+    <div className="register-container">
+      <div className="register-left">
         <img
           src="https://img.freepik.com/free-vector/organic-farming-concept_23-2148433516.jpg?semt=ais_hybrid&w=740"
           alt="Farmer"
-          className="w-3/4 h-auto"
         />
       </div>
 
-      {/* Right form section */}
-      <div className="w-1/2 flex flex-col justify-center px-20">
-        <h2 className="text-4xl font-bold mb-4 text-gray-800">Welcome to Farm2Customer</h2>
-        <p className="mb-6 text-gray-600">Register your account</p>
+      <div className="register-right">
+        <h2 className="register-title">Welcome to Farm2Customer</h2>
+        <p className="register-subtitle">Register your account</p>
 
-        <form className="space-y-4" onSubmit={handleRegister}>
+        <form className="register-form" onSubmit={handleRegister}>
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="register-select"
           >
             <option value="customer">Customer</option>
             <option value="farmer">Farmer</option>
@@ -74,7 +72,7 @@ const Register = () => {
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="register-input"
             required
           />
 
@@ -83,7 +81,7 @@ const Register = () => {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="register-input"
             required
           />
 
@@ -92,7 +90,7 @@ const Register = () => {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="register-input"
             required
           />
 
@@ -101,7 +99,7 @@ const Register = () => {
             placeholder="Phone"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="register-input"
           />
 
           <input
@@ -109,27 +107,21 @@ const Register = () => {
             placeholder="Address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
+            className="register-input"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 rounded-md transition ${
-              loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-green-500 hover:bg-green-600 text-white'
-            }`}
+            className="register-button"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-gray-600">
+        <p className="register-footer">
           Already have an account?{' '}
-          <Link to="/login" className="text-green-600 font-semibold hover:underline">
-            Login here
-          </Link>
+          <Link to="/login">Login here</Link>
         </p>
       </div>
     </div>

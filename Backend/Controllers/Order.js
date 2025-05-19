@@ -1,6 +1,6 @@
 const Order = require('../Models/Order');
 const Product = require('../Models/Product');
-
+// filepath: /Users/arvindkumar/Desktop/untitled folder/Backend/Controllers/Order.js
 const createOrder = async (req, res) => {
   try {
     const { items, totalPrice, deliveryType } = req.body;
@@ -9,20 +9,20 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No items in order' });
     }
 
-    // Get the first product from the list to determine the farmer
-    const firstProduct = await Product.findById(items[0].product);
+    // Validate and fetch the farmer from the first product
+    const firstProduct = await Product.findById(items[0].product).populate('farmer');
     if (!firstProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const farmerId = firstProduct.farmer;
+    const farmerId = firstProduct.farmer._id;
 
     const order = new Order({
       customer: req.user._id,
       items,
       totalPrice,
       deliveryType,
-      farmer: farmerId
+      farmer: farmerId,
     });
 
     await order.save();
