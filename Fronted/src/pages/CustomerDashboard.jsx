@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import '../styles/ CustomerDashboard.css'; 
+import { Link, useNavigate } from 'react-router-dom';
+import '../styles/CustomerDashboard.css';
+
 const CustomerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -9,7 +11,8 @@ const CustomerDashboard = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchAllProducts = async () => {
       try {
@@ -19,7 +22,7 @@ const CustomerDashboard = () => {
         setLoading(false);
       } catch (err) {
         console.error('Error fetching all products:', err);
-        setError(' Failed to load products. Please try again later.');
+        setError('Failed to load products. Please try again later.');
         setLoading(false);
       }
     };
@@ -27,7 +30,6 @@ const CustomerDashboard = () => {
     fetchAllProducts();
   }, []);
 
- 
   const handleOrderClick = (product) => {
     setSelectedProduct(product);
     setOrderForm({ quantity: 1, deliveryType: 'Delivery' });
@@ -35,7 +37,6 @@ const CustomerDashboard = () => {
     setError('');
   };
 
-  // Handle order submission
   const handleOrderSubmit = async (e) => {
     e.preventDefault();
     if (!selectedProduct) return;
@@ -62,7 +63,8 @@ const CustomerDashboard = () => {
         deliveryType: orderForm.deliveryType,
       };
 
-      console.log('Payload:', payload); 
+      console.log('Payload:', payload);
+
       const response = await axios.post('http://localhost:8000/api/orders', payload, config);
       console.log('Response:', response.data);
 
@@ -75,15 +77,28 @@ const CustomerDashboard = () => {
     }
   };
 
-  
   const handleOverlayClick = (e) => {
     if (e.target.id === 'orderModalOverlay') {
       setSelectedProduct(null);
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
   return (
     <div className="container">
+      {/* Navigation Bar */}
+      <nav className="navbar">
+        <Link to="/" className="nav-link">Home</Link>
+        <Link to="/CustomerDashboard" className="nav-link">Products</Link>
+        <Link to="/OrderHistory" className="nav-link">Order History</Link>
+        <Link to="/Profile" className="nav-link">Profile</Link>
+        <button onClick={handleLogout} className="nav-link logout-btn">Logout</button>
+      </nav>
+
       <h2 className="heading">All Available Farmer Products</h2>
 
       {message && <div className="message-success">{message}</div>}
@@ -113,7 +128,6 @@ const CustomerDashboard = () => {
         </div>
       )}
 
-    
       {selectedProduct && (
         <div
           id="orderModalOverlay"

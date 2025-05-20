@@ -1,0 +1,97 @@
+/* Product Section */
+.product-section {
+  margin-top: 2rem;
+}
+
+.product-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+/* Product List */
+.product-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Product Item */
+.product-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Product Details */
+.product-details {
+  flex: 1;
+  margin-right: 1rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+/* Product Image */
+.product-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-right: 1rem;
+}
+
+/* Product Actions */
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Edit Button */
+.edit-btn {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.edit-btn:hover {
+  background-color: #1976D2;
+}
+
+/* Delete Button */
+.delete-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .product-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-actions {
+    margin-top: 1rem;
+  }
+}

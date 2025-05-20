@@ -1,7 +1,6 @@
 const Order = require('../Models/Order');
 const Product = require('../Models/Product');
 
-// Create Order
 const createOrder = async (req, res) => {
   try {
     const { items, totalPrice, deliveryType } = req.body;
@@ -10,7 +9,6 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No items in order' });
     }
 
-    // Validate and fetch the farmer from the first product
     const firstProduct = await Product.findById(items[0].product).populate('createdBy');
     if (!firstProduct) {
       return res.status(404).json({ message: 'Product not found' });
@@ -34,7 +32,7 @@ const createOrder = async (req, res) => {
   }
 };
 
-// Get Customer Orders
+
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ customer: req.user._id })
@@ -47,7 +45,6 @@ const getUserOrders = async (req, res) => {
   }
 };
 
-// Get Farmer Orders
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find({ farmer: req.user._id })
@@ -61,7 +58,6 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-// Update Order Status
 const updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -77,5 +73,16 @@ const updateOrderStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update order status' });
   }
 };
+const getFarmerOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ farmer: req.user._id })
+      .populate('customer', 'name email')
+      .populate('items.product', 'name image price')
+      .sort({ createdAt: -1 });
 
-module.exports = { createOrder, getUserOrders, getAllOrders, updateOrderStatus };
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+};
+module.exports = { createOrder, getUserOrders, getAllOrders, updateOrderStatus,getFarmerOrders };

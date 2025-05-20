@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 
-const { createOrder, getUserOrders, getAllOrders, updateOrderStatus } = require('../Controllers/Order');
+const { createOrder, getUserOrders, getAllOrders, updateOrderStatus ,getFarmerOrders} = require('../Controllers/Order');
 const { authenticateUser, authorizeRoles } = require('../middleware/authMiddleware');
 
-// Customer Routes
+
 router.post('/', authenticateUser, createOrder);
 router.get('/my-orders', authenticateUser, authorizeRoles('customer'), getUserOrders);
+router.get('/farmer-orders', authenticateUser, authorizeRoles('farmer'), getFarmerOrders);
 
-// Farmer Routes
 router.get('/', authenticateUser, authorizeRoles('farmer'), getAllOrders);
 router.put('/:id', authenticateUser, authorizeRoles('farmer'), updateOrderStatus);
 

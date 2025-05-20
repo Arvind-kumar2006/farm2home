@@ -11,9 +11,9 @@ const {
 
 const { authenticateUser, authorizeRoles } = require('../middleware/authMiddleware');
 
-// Correct order of routes
+
 router.get('/my-products', authenticateUser, authorizeRoles('farmer'), getFarmerProducts);
-router.get('/', getAllProducts); // this must come BEFORE any route with ":id"
+router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 router.post('/', authenticateUser, authorizeRoles('farmer'), createProduct);
 router.put('/:id', authenticateUser, authorizeRoles('farmer'), updateProduct);
