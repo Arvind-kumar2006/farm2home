@@ -21,6 +21,7 @@ const createProduct = async (req, res) => {
   }
 };
 
+
 const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().populate('createdBy', 'name email');
@@ -29,6 +30,7 @@ const getAllProducts = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 };
+
 
 const getProductById = async (req, res) => {
   try {
@@ -39,6 +41,8 @@ const getProductById = async (req, res) => {
     res.status(500).json({ error: 'Error fetching product' });
   }
 };
+
+
 
 const updateProduct = async (req, res) => {
   try {
@@ -54,6 +58,8 @@ const updateProduct = async (req, res) => {
   }
 };
 
+
+
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findOneAndDelete({ _id: req.params.id, createdBy: req.user._id });
@@ -64,7 +70,6 @@ const deleteProduct = async (req, res) => {
     res.status(500).json({ error: 'Delete failed' });
   }
 };
-
 
 const getFarmerProducts = async (req, res) => {
   try {

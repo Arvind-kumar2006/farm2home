@@ -9,7 +9,7 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No items in order' });
     }
 
-    // Calculate total price if not provided
+   
     let computedTotalPrice = totalPrice;
     if (!computedTotalPrice) {
       computedTotalPrice = 0;
@@ -44,15 +44,16 @@ const createOrder = async (req, res) => {
 };
 
 
+
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ customer: req.user._id })
-      .populate('items.product', 'name price image') // Ensure 'image' is populated if needed
+      .populate('items.product', 'name price image') 
       .sort({ createdAt: -1 });
 
     res.json(orders);
   } catch (err) {
-    console.error('Error fetching orders:', err); // Debug log
+    console.error('Error fetching orders:', err); 
     res.status(500).json({ error: 'Failed to fetch your orders' });
   }
 };
