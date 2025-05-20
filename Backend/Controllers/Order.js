@@ -9,6 +9,17 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'No items in order' });
     }
 
+    // Calculate total price if not provided
+    let computedTotalPrice = totalPrice;
+    if (!computedTotalPrice) {
+      computedTotalPrice = 0;
+      for (const item of items) {
+        const product = await Product.findById(item.product);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
+        computedTotalPrice += product.price * item.quantity;
+      }
+    }
+
     const firstProduct = await Product.findById(items[0].product).populate('createdBy');
     if (!firstProduct) {
       return res.status(404).json({ message: 'Product not found' });
@@ -19,7 +30,7 @@ const createOrder = async (req, res) => {
     const order = new Order({
       customer: req.user._id,
       items,
-      totalPrice,
+      totalPrice: computedTotalPrice,
       deliveryType,
       farmer: farmerId,
     });
@@ -36,11 +47,12 @@ const createOrder = async (req, res) => {
 const getUserOrders = async (req, res) => {
   try {
     const orders = await Order.find({ customer: req.user._id })
-      .populate('items.product', 'name price')
+      .populate('items.product', 'name price image') // Ensure 'image' is populated if needed
       .sort({ createdAt: -1 });
 
     res.json(orders);
   } catch (err) {
+    console.error('Error fetching orders:', err); // Debug log
     res.status(500).json({ error: 'Failed to fetch your orders' });
   }
 };

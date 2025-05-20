@@ -55,13 +55,27 @@ const Orders = () => {
           {orders.map((order) => (
             <div key={order._id} className="order-card">
               <div className="order-header">
+                <img
+                  src={order.items[0].product.image || 'https://placehold.co/80x80?text=No+Image'}
+                  alt={order.items[0].product.name}
+                  className="order-img"
+                  onError={e => { e.target.onerror = null; e.target.src = 'https://placehold.co/80x80?text=No+Image'; }}
+                  style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, marginRight: 16 }}
+                />
                 <h3>{order.items[0].product.name}</h3>
                 <span className={`status ${order.status.toLowerCase()}`}>{order.status}</span>
               </div>
               <div className="order-details">
                 <p>Customer: {order.customer.name}</p>
                 <p>Quantity: {order.items[0].quantity}</p>
-                <p>Total Price: ₹{order.totalPrice}</p>
+                <p>
+                  Total Price: ₹
+                  {order.totalPrice && order.totalPrice > 0
+                    ? order.totalPrice
+                    : (order.items[0].product.price && order.items[0].quantity
+                        ? (order.items[0].product.price * order.items[0].quantity).toFixed(2)
+                        : 'N/A')}
+                </p>
                 <p>Delivery Type: {order.deliveryType}</p>
               </div>
               <div className="order-actions">

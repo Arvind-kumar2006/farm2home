@@ -4,87 +4,85 @@ import '../styles/FarmerOrders.css';
 
 const FarmerOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        const token = localStorage.getItem('token');
-        const config = { headers: { Authorization: `Bearer ${token}` } };
-        const res = await axios.get('http://localhost:8000/api/orders/farmer-orders', config);
-        setOrders(res.data);
-      } catch (err) {
-        console.error('Error fetching orders:', err);
-        setError('Failed to fetch orders.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchOrders();
   }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const config = { headers: { Authorization: `Bearer ${token}` } };
+      const response = await axios.get('http://localhost:8000/api/orders/farmer-orders', config);
+      setOrders(response.data);
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+    }
+  };
 
   const updateOrderStatus = async (orderId, status) => {
     try {
       const token = localStorage.getItem('token');
       const config = { headers: { Authorization: `Bearer ${token}` } };
       await axios.put(`http://localhost:8000/api/orders/${orderId}`, { status }, config);
-      setOrders((prevOrders) =>
-        prevOrders.map((order) =>
-          order._id === orderId ? { ...order, status } : order
-        )
-      );
-    } catch (err) {
-      console.error('Error updating order status:', err);
-      alert('Failed to update order status.');
+      fetchOrders(); // Refresh orders after update
+    } catch (error) {
+      console.error('Error updating order status:', error);
     }
   };
 
   return (
     <div className="farmer-orders-container">
-      <h2>Incoming Orders</h2>
-      {loading ? (
-        <p>Loading orders...</p>
-      ) : error ? (
-        <p className="error">{error}</p>
-      ) : orders.length === 0 ? (
-        <p>No orders found.</p>
-      ) : (
-        <div className="order-list">
-          {orders.map((order) => (
+      <h2>Customer Orders</h2>
+      <div className="order-list">
+        {orders.map((order) => {
+          const item = order.items?.[0];
+          const product = item?.product || {};
+          // Debug log
+          console.log('Order:', order);
+          console.log('Product:', product);
+          return (
             <div key={order._id} className="order-card">
-              <div className="order-details">
+              <div className="order-img-col">
                 <img
-                  src={order.items[0].product.image || 'https://placehold.co/80x80'}
-                  alt={order.items[0].product.name}
+                  src={product.image ? product.image : 'https://placehold.co/120x120?text=No+Image'}
+                  alt={product.name || 'Product'}
                   className="order-img"
+                  onError={e => { e.target.onerror = null; e.target.src = 'https://placehold.co/120x120?text=No+Image'; }}
                 />
-                <div>
-                  <h3>{order.items[0].product.name}</h3>
-                  <p>Customer: {order.customer.name}</p>
-                  <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                  <p>Quantity: {order.items[0].quantity}</p>
-                  <p>Total Price: ₹{order.totalPrice}</p>
-                  <p>Status: {order.status}</p>
+              </div>
+              <div className="order-main-col">
+                <div className="order-header">
+                  <h3 className="product-name">{product.name || 'N/A'}</h3>
+                  <span className={`status-badge ${order.status.toLowerCase()}`}>{order.status}</span>
+                </div>
+                <div className="order-info">
+                  <p><strong>Customer:</strong> {order.customer?.name || 'Unknown'}</p>
+                  <p><strong>Quantity:</strong> {item?.quantity || 0}</p>
+                  <p><strong>Total Price:</strong> ₹{
+                    (typeof product.price === 'number' && typeof item?.quantity === 'number')
+                      ? (product.price * item.quantity).toFixed(2)
+                      : (order.totalPrice ? order.totalPrice.toFixed(2) : 'N/A')
+                  }</p>
+                  <p><strong>Delivery Type:</strong> {order.deliveryType || 'N/A'}</p>
+                </div>
+                <div className="order-actions">
+                  {order.status === 'Pending' ? (
+                    <>
+                      <button className="accept-btn" onClick={() => updateOrderStatus(order._id, 'Accepted')}>Accept</button>
+                      <button className="reject-btn" onClick={() => updateOrderStatus(order._id, 'Rejected')}>Reject</button>
+                    </>
+                  ) : order.status === 'Accepted' ? (
+                    <button className="deliver-btn" onClick={() => updateOrderStatus(order._id, 'Delivered')}>Mark as Delivered</button>
+                  ) : null}
                 </div>
               </div>
-              {order.status === 'Pending' && (
-                <div className="order-actions">
-                  <button onClick={() => updateOrderStatus(order._id, 'Accepted')}>Accept</button>
-                  <button onClick={() => updateOrderStatus(order._id, 'Rejected')}>Reject</button>
-                </div>
-              )}
-              {order.status === 'Accepted' && (
-                <button onClick={() => updateOrderStatus(order._id, 'Delivered')}>Mark as Delivered</button>
-              )}
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 };
+
 export default FarmerOrders;

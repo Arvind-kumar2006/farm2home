@@ -13,11 +13,31 @@ const OrderHistory = () => {
       setError('');
       try {
         const token = localStorage.getItem('token');
-        const config = { headers: { Authorization: `Bearer ${token}` } };
+        if (!token) {
+          setError('No authentication token found. Please login again.');
+          setLoading(false);
+          return;
+        }
+        
+        console.log('Token:', token); // Debug log
+        const config = { 
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          } 
+        };
+        
+        console.log('Making request to fetch orders...'); // Debug log
         const res = await axios.get('http://localhost:8000/api/orders/my-orders', config);
+        console.log("Orders received:", res.data); // Debug log
         setOrders(res.data);
       } catch (err) {
-        setError('Failed to fetch orders.');
+        console.error('Error details:', {
+          message: err.message,
+          response: err.response?.data,
+          status: err.response?.status
+        });
+        setError(err.response?.data?.message || 'Failed to fetch orders. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -46,10 +66,19 @@ const OrderHistory = () => {
                   className="order-img"
                 />
                 <div>
-                  <h3>{order.items[0].product.name}</h3>
+                  <h3 className="product-name">{order.items[0].product.name}</h3>
                   <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
                   <p>Quantity: {order.items[0].quantity}</p>
-                  <p>Total Price: ₹{order.totalPrice}</p>
+                  <p>
+                    Total Price: ₹{
+                      order.totalPrice
+                        ? order.totalPrice.toFixed(2)
+                        : order.items.reduce(
+                            (sum, item) => sum + (item.product.price * item.quantity),
+                            0
+                          ).toFixed(2)
+                    }
+                  </p>
                   <p>Status: {order.status}</p>
                 </div>
               </div>
