@@ -38,9 +38,6 @@ const FarmerOrders = () => {
         {orders.map((order) => {
           const item = order.items?.[0];
           const product = item?.product || {};
-          // Debug log
-          console.log('Order:', order);
-          console.log('Product:', product);
           return (
             <div key={order._id} className="order-card">
               <div className="order-img-col">

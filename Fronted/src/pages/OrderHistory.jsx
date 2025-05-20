@@ -19,7 +19,6 @@ const OrderHistory = () => {
           return;
         }
         
-        console.log('Token:', token); // Debug log
         const config = { 
           headers: { 
             Authorization: `Bearer ${token}`,
@@ -27,16 +26,9 @@ const OrderHistory = () => {
           } 
         };
         
-        console.log('Making request to fetch orders...'); // Debug log
         const res = await axios.get('http://localhost:8000/api/orders/my-orders', config);
-        console.log("Orders received:", res.data); // Debug log
         setOrders(res.data);
       } catch (err) {
-        console.error('Error details:', {
-          message: err.message,
-          response: err.response?.data,
-          status: err.response?.status
-        });
         setError(err.response?.data?.message || 'Failed to fetch orders. Please try again.');
       } finally {
         setLoading(false);
