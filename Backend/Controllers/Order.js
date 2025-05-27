@@ -86,6 +86,8 @@ const updateOrderStatus = async (req, res) => {
     res.status(500).json({ error: 'Failed to update order status' });
   }
 };
+
+
 const getFarmerOrders = async (req, res) => {
   try {
     const orders = await Order.find({ farmer: req.user._id })

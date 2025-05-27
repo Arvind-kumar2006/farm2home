@@ -5,30 +5,67 @@ import '../styles/CustomerDashboard.css';
 
 const CustomerDashboard = () => {
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [orderForm, setOrderForm] = useState({ quantity: 1, deliveryType: 'Delivery' });
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategories, setSelectedCategories] = useState([]);
 
+  const categories = ['Vegetables', 'Grains', 'Dairy', 'Fruits', 'Pulses', 'Spices'];
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchAllProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get('http://localhost:8000/api/products');
-        setProducts(res.data.products || []);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching all products:', err);
-        setError('Failed to load products. Please try again later.');
-        setLoading(false);
-      }
-    };
-
-    fetchAllProducts();
+    fetchProducts();
   }, []);
+
+  useEffect(() => {
+    filterProducts();
+  }, [searchTerm, selectedCategories, products]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:8000/api/products');
+      setProducts(response.data.products || []);
+      setFilteredProducts(response.data.products || []);
+    } catch (err) {
+      setError('Failed to load products. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterProducts = () => {
+    let filtered = products;
+
+    // Filter by search term
+    if (searchTerm) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    // Filter by selected categories
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter(product =>
+        selectedCategories.includes(product.category)
+      );
+    }
+
+    setFilteredProducts(filtered);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
 
   const handleOrderClick = (product) => {
     setSelectedProduct(product);
@@ -41,12 +78,6 @@ const CustomerDashboard = () => {
     e.preventDefault();
     if (!selectedProduct) return;
 
-    const quantity = Number(orderForm.quantity);
-    if (quantity < 1) {
-      setError('Quantity must be at least 1.');
-      return;
-    }
-
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -54,32 +85,22 @@ const CustomerDashboard = () => {
         return;
       }
 
-      const config = {
-        headers: { Authorization: `Bearer ${token}` },
-      };
-
-      const payload = {
-        items: [{ product: selectedProduct._id, quantity }],
-        deliveryType: orderForm.deliveryType,
-      };
-
-      console.log('Payload:', payload);
-
-      const response = await axios.post('http://localhost:8000/api/orders', payload, config);
-      console.log('Response:', response.data);
+      const response = await axios.post(
+        'http://localhost:8000/api/orders',
+        {
+          items: [{ product: selectedProduct._id, quantity: orderForm.quantity }],
+          deliveryType: orderForm.deliveryType,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      );
 
       setMessage('Order placed successfully!');
       setSelectedProduct(null);
       setOrderForm({ quantity: 1, deliveryType: 'Delivery' });
     } catch (err) {
-      console.error('Order Error:', err?.response?.data || err);
-      setError(err?.response?.data?.message || 'Could not place order. Try again later.');
-    }
-  };
-
-  const handleOverlayClick = (e) => {
-    if (e.target.id === 'orderModalOverlay') {
-      setSelectedProduct(null);
+      setError(err.response?.data?.message || 'Could not place order. Try again later.');
     }
   };
 
@@ -89,89 +110,119 @@ const CustomerDashboard = () => {
   };
 
   return (
-    <div className="container">
+    <div className="dashboard-container">
       {/* Navigation Bar */}
       <nav className="navbar">
-        <Link to="/" className="nav-link">Home</Link>
-        <Link to="/CustomerDashboard" className="nav-link">Products</Link>
-        <Link to="/OrderHistory" className="nav-link">Order History</Link>
-        <Link to="/Profile" className="nav-link">Profile</Link>
-        <button onClick={handleLogout} className="nav-link logout-btn">Logout</button>
+        <Link to="/" className="nav-logo">FarmFresh</Link>
+        <div className="nav-links">
+          <Link to="/" className="nav-link">Home</Link>
+          <Link to="/CustomerDashboard" className="nav-link">Products</Link>
+          <Link to="/OrderHistory" className="nav-link">Order History</Link>
+          <Link to="/Profile" className="nav-link">Profile</Link>
+        </div>
+        <button onClick={handleLogout} className="logout-btn">Logout</button>
       </nav>
 
-      <h2 className="heading">All Available Farmer Products</h2>
-
-      {message && <div className="message-success">{message}</div>}
-      {error && <div className="message-error">{error}</div>}
-
-      {loading ? (
-        <p className="loading">Loading products...</p>
-      ) : products.length === 0 ? (
-        <p className="no-products">No products available at the moment.</p>
-      ) : (
-        <div className="products-grid">
-          {products.map((prod) => (
-            <div key={prod._id} className="product-card">
-              {prod.image && (
-                <img src={prod.image} alt={prod.name} className="product-img" />
-              )}
-              <h3 className="product-name">{prod.name}</h3>
-              <p className="product-category">Category: {prod.category}</p>
-              <p className="product-desc">{prod.description}</p>
-              <p className="product-price">₹ {prod.price}</p>
-              <p className="product-available">Available: {prod.quantity}</p>
-              <button onClick={() => handleOrderClick(prod)} className="order-btn">
-                Order Now
-              </button>
-            </div>
+      {/* Sidebar */}
+      <div className="sidebar">
+        <h3>Categories</h3>
+        <div className="category-list">
+          {categories.map((category) => (
+            <label key={category} className="category-item">
+              <input
+                type="checkbox"
+                checked={selectedCategories.includes(category)}
+                onChange={() => handleCategoryChange(category)}
+              />
+              {category}
+            </label>
           ))}
         </div>
-      )}
+      </div>
 
-      {selectedProduct && (
-        <div
-          id="orderModalOverlay"
-          className="modal-overlay"
-          onClick={handleOverlayClick}
-        >
-          <div className="modal-content">
-            <h3 className="modal-title">Order: {selectedProduct.name}</h3>
+      {/* Main Content */}
+      <div className="main-content">
+        <h1 className="page-title">All Available Farmer Products</h1>
 
-            <form onSubmit={handleOrderSubmit} className="modal-form">
-              <label>
-                Quantity:
-                <input
-                  type="number"
-                  min="1"
-                  value={orderForm.quantity}
-                  onChange={(e) =>
-                    setOrderForm({ ...orderForm, quantity: Number(e.target.value) })
-                  }
-                  required
-                />
-              </label>
-
-              <label>
-                Delivery Type:
-                <select
-                  value={orderForm.deliveryType}
-                  onChange={(e) =>
-                    setOrderForm({ ...orderForm, deliveryType: e.target.value })
-                  }
-                >
-                  <option value="Delivery">Delivery</option>
-                  <option value="Pickup">Pickup</option>
-                </select>
-              </label>
-
-              <div className="modal-actions">
-                <button type="submit" className="modal-submit">Place Order</button>
-                <button type="button" onClick={() => setSelectedProduct(null)} className="modal-cancel">Cancel</button>
-              </div>
-            </form>
-          </div>
+        {/* Search Bar */}
+        <div className="search-container">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
         </div>
-      )}
+
+        {message && <div className="message-success">{message}</div>}
+        {error && <div className="message-error">{error}</div>}
+
+        {loading ? (
+          <div className="loading">Loading products...</div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="no-products">No products available at the moment.</div>
+        ) : (
+          <div className="products-grid">
+            {filteredProducts.map((product) => (
+              <div key={product._id} className="product-card">
+                {product.image && (
+                  <img src={product.image} alt={product.name} className="product-image" />
+                )}
+                <div className="product-content">
+                  <h3 className="product-name">{product.name}</h3>
+                  <p className="product-category">Category: {product.category}</p>
+                  <p className="product-description">{product.description}</p>
+                  <p className="product-price">₹ {product.price}</p>
+                  <p className="product-availability">Available: {product.quantity}</p>
+                  <button onClick={() => handleOrderClick(product)} className="order-button">
+                    Order Now
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Order Modal */}
+        {selectedProduct && (
+          <div className="modal-overlay" onClick={(e) => e.target.className === 'modal-overlay' && setSelectedProduct(null)}>
+            <div className="modal-content">
+              <h3 className="modal-title">Order: {selectedProduct.name}</h3>
+              <form onSubmit={handleOrderSubmit} className="modal-form">
+                <div className="form-group">
+                  <label>Quantity:</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={orderForm.quantity}
+                    onChange={(e) => setOrderForm({ ...orderForm, quantity: Number(e.target.value) })}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Delivery Type:</label>
+                  <select
+                    value={orderForm.deliveryType}
+                    onChange={(e) => setOrderForm({ ...orderForm, deliveryType: e.target.value })}
+                  >
+                    <option value="Delivery">Delivery</option>
+                    <option value="Pickup">Pickup</option>
+                  </select>
+                </div>
+
+                <div className="form-actions">
+                  <button type="submit" className="save-button">Place Order</button>
+                  <button type="button" onClick={() => setSelectedProduct(null)} className="cancel-button">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

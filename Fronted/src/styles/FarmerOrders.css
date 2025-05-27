@@ -1,6 +1,6 @@
 .farmer-orders-container {
-  padding: 30px;
-  max-width: 900px;
+  padding: 20px;
+  max-width: 1200px;
   margin: 0 auto;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -16,33 +16,64 @@ h2 {
   gap: 20px;
 }
 
-.order-card {
-  border: 1px solid #ccc;
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  background-color: #fff;
+/* Order Summary Bar Styles */
+.order-summary-bar {
   display: flex;
-  align-items: flex-start;
-  gap: 2rem;
-  transition: box-shadow 0.2s;
+  justify-content: space-between;
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.order-card:hover {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+.summary-item {
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 6px;
+  background: white;
+  min-width: 120px;
+}
+
+.summary-label {
+  display: block;
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 5px;
+}
+
+.summary-value {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.summary-value.pending { color: #ffc107; }
+.summary-value.accepted { color: #28a745; }
+.summary-value.rejected { color: #dc3545; }
+.summary-value.delivered { color: #17a2b8; }
+
+/* Order Card Styles */
+.order-card {
+  display: flex;
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .order-img-col {
-  flex-shrink: 0;
+  flex: 0 0 120px;
+  margin-right: 20px;
 }
 
 .order-img {
-  width: 110px;
-  height: 110px;
+  width: 120px;
+  height: 120px;
   object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid #f0f0f0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-radius: 4px;
 }
 
 .order-main-col {
@@ -51,97 +82,89 @@ h2 {
 
 .order-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
 }
 
 .product-name {
-  font-size: 1.3rem;
-  font-weight: bold;
   margin: 0;
+  font-size: 1.2rem;
+  color: #333;
 }
 
 .status-badge {
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 15px;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.9rem;
   font-weight: 500;
-  text-transform: capitalize;
-  background: #e3eafc;
-  color: #1a237e;
-  margin-left: 8px;
-  letter-spacing: 0.5px;
 }
 
-.status-badge.pending {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-badge.accepted {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-badge.rejected {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
-.status-badge.delivered {
-  background-color: #cce5ff;
-  color: #004085;
-}
+.status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.accepted { background: #d4edda; color: #155724; }
+.status-badge.rejected { background: #f8d7da; color: #721c24; }
+.status-badge.delivered { background: #d1ecf1; color: #0c5460; }
 
 .order-info {
-  margin-bottom: 10px;
-  font-size: 16px;
-  line-height: 1.7;
-  color: #444;
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+}
+
+.customer-info, .order-details {
+  flex: 1;
+}
+
+.customer-info h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.order-info p {
+  margin: 5px 0;
+  color: #666;
 }
 
 .order-actions {
   display: flex;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .order-actions button {
-  padding: 8px 18px;
+  padding: 8px 16px;
   border: none;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 500;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s;
+  font-weight: 500;
+  transition: background-color 0.2s;
 }
 
 .accept-btn {
-  background-color: #28a745;
-  color: #fff;
+  background: #28a745;
+  color: white;
 }
 
 .accept-btn:hover {
-  background-color: #218838;
+  background: #218838;
 }
 
 .reject-btn {
-  background-color: #dc3545;
-  color: #fff;
+  background: #dc3545;
+  color: white;
 }
 
 .reject-btn:hover {
-  background-color: #c82333;
+  background: #c82333;
 }
 
 .deliver-btn {
-  background-color: #007bff;
-  color: #fff;
+  background: #17a2b8;
+  color: white;
 }
 
 .deliver-btn:hover {
-  background-color: #0056b3;
+  background: #138496;
 }
 
 @media (max-width: 700px) {

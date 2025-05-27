@@ -14,9 +14,24 @@ export default function HomePage() {
   }, []);
 
   const categories = [
-    { id: 1, name: 'Fruits', image: 'https://img.freepik.com/free-photo/fresh-fruits-vegetables_144627-16201.jpg' },
-    { id: 2, name: 'Vegetables', image: 'https://img.freepik.com/free-photo/vegetables-basket_144627-27201.jpg' },
-    { id: 3, name: 'Grains', image: 'https://img.freepik.com/free-photo/grains-bowl_144627-27202.jpg' },
+    { 
+      id: 1, 
+      name: 'Fruits', 
+      image: 'https://media.istockphoto.com/id/529664572/photo/fruit-background.jpg?s=612x612&w=0&k=20&c=K7V0rVCGj8tvluXDqxJgu0AdMKF8axP0A15P-8Ksh3I=',
+      description: 'Fresh and seasonal fruits from local farms'
+    },
+    { 
+      id: 2, 
+      name: 'Vegetables', 
+      image: 'https://agricultureguruji.com/wp-content/uploads/2021/05/best-vegetable-grow-in-greenhouse-scaled.jpeg.webp',
+      description: 'Organic vegetables grown with care'
+    },
+    { 
+      id: 3, 
+      name: 'Grains', 
+      image: 'https://static.toiimg.com/thumb/msid-71866680,width-1280,height-720,resizemode-4/71866680.jpg',
+      description: 'Premium quality grains and cereals'
+    },
   ];
 
   const steps = [
