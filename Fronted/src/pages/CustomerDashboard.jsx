@@ -85,6 +85,12 @@ const CustomerDashboard = () => {
         return;
       }
 
+      // Check if requested quantity is greater than available stock
+      if (orderForm.quantity > selectedProduct.quantity) {
+        setError(`Sorry, only ${selectedProduct.quantity} units available. Please reduce your order quantity.`);
+        return;
+      }
+
       const response = await axios.post(
         'http://localhost:8000/api/orders',
         {
@@ -118,7 +124,6 @@ const CustomerDashboard = () => {
           <Link to="/" className="nav-link">Home</Link>
           <Link to="/CustomerDashboard" className="nav-link">Products</Link>
           <Link to="/OrderHistory" className="nav-link">Order History</Link>
-          <Link to="/Profile" className="nav-link">Profile</Link>
         </div>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </nav>
@@ -195,6 +200,7 @@ const CustomerDashboard = () => {
                   <input
                     type="number"
                     min="1"
+                    max={selectedProduct.quantity}
                     value={orderForm.quantity}
                     onChange={(e) => setOrderForm({ ...orderForm, quantity: Number(e.target.value) })}
                     required

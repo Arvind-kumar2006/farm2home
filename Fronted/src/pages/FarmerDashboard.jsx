@@ -235,7 +235,6 @@ const FarmerDashboard = () => {
           <Link to="/" className="nav-link">Home</Link>
           <Link to="/FarmerDashboard" className="nav-link">My Products</Link>
           <Link to="/FarmerOrders" className="nav-link">Order History</Link>
-          <Link to="/Profile" className="nav-link">Profile</Link>
         </div>
         <button onClick={handleLogout} className="logout-btn">Logout</button>
       </nav>

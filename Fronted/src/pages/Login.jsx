@@ -7,11 +7,15 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setLoginSuccess(false);
+    setErrorMessage('');
 
     try {
       const response = await axios.post('http://localhost:8000/api/auth/login', {
@@ -24,15 +28,18 @@ const Login = () => {
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
 
-      alert('Login successful!');
-
-      if (user.role === 'farmer') {
-        navigate('/FarmerDashboard');
-      } else {
-        navigate('/CustomerDashboard');
-      }
+      setLoginSuccess(true);
+      
+      // Navigate after a short delay to show the success message
+      setTimeout(() => {
+        if (user.role === 'farmer') {
+          navigate('/FarmerDashboard');
+        } else {
+          navigate('/CustomerDashboard');
+        }
+      }, 1500);
     } catch (error) {
-      alert(error.response?.data?.message || 'Login failed');
+      setErrorMessage(error.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -51,6 +58,9 @@ const Login = () => {
       <div className="login-form-section">
         <h2 className="login-heading">Welcome Back!</h2>
         <p className="login-subheading">Login to your account</p>
+
+        {loginSuccess && <div className="success-alert">✅ Login successful!</div>}
+        {errorMessage && <div className="error-alert">❌ {errorMessage}</div>}
 
         <form className="login-form" onSubmit={handleSubmit}>
           <input

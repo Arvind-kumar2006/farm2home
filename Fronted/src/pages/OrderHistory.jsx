@@ -48,35 +48,52 @@ const OrderHistory = () => {
       ) : orders.length === 0 ? (
         <p>No orders found.</p>
       ) : (
-        <div className="order-list">
-          {orders.map((order) => (
-            <div key={order._id} className="order-card">
-              <div className="order-details">
-                <img
-                  src={order.items[0].product.image || 'https://placehold.co/80x80'}
-                  alt={order.items[0].product.name}
-                  className="order-img"
-                />
-                <div>
-                  <h3 className="product-name">{order.items[0].product.name}</h3>
-                  <p>Order Date: {new Date(order.createdAt).toLocaleDateString()}</p>
-                  <p>Quantity: {order.items[0].quantity}</p>
-                  <p>
-                    Total Price: ₹{
-                      order.totalPrice
-                        ? order.totalPrice.toFixed(2)
-                        : order.items.reduce(
-                            (sum, item) => sum + (item.product.price * item.quantity),
-                            0
-                          ).toFixed(2)
-                    }
-                  </p>
-                  <p>Status: {order.status}</p>
-                </div>
-              </div>
-              <button className="track-order-btn">Track Order</button>
-            </div>
-          ))}
+        <div className="table-container">
+          <table className="orders-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Image</th>
+                <th>Order Date</th>
+                <th>Quantity</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order._id}>
+                  <td>{order.items[0].product.name}</td>
+                  <td>
+                    <img
+                      src={order.items[0].product.image || 'https://placehold.co/80x80'}
+                      alt={order.items[0].product.name}
+                      className="order-img"
+                    />
+                  </td>
+                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                  <td>{order.items[0].quantity}</td>
+                  <td>₹{
+                    order.totalPrice
+                      ? order.totalPrice.toFixed(2)
+                      : order.items.reduce(
+                          (sum, item) => sum + (item.product.price * item.quantity),
+                          0
+                        ).toFixed(2)
+                  }</td>
+                  <td>
+                    <span className={`status-badge ${order.status.toLowerCase()}`}>
+                      {order.status}
+                    </span>
+                  </td>
+                  <td>
+                    <button className="track-order-btn">Track</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
