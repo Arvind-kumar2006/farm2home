@@ -73,18 +73,20 @@ const FarmerOrders = () => {
         {orders.map((order) => {
           const item = order.items?.[0];
           const product = item?.product || {};
+          const snapshot = item?.productSnapshot || {};
+          const displayProduct = (product && product.name) ? product : snapshot;
           return (
             <div key={order._id} className="order-card">
               <div className="order-img-col">
                 <img
-                  src={product.image ? product.image : 'https://placehold.co/120x120?text=No+Image'}
-                  alt={product.name || 'Product'}
+                  src={displayProduct.image ? displayProduct.image : 'https://placehold.co/120x120?text=No+Image'}
+                  alt={displayProduct.name || 'Product'}
                   className="order-img"
                 />
               </div>
               <div className="order-main-col">
                 <div className="order-header">
-                  <h3 className="product-name">{product.name || 'N/A'}</h3>
+                  <h3 className="product-name">{displayProduct.name || 'N/A'}</h3>
                   <span className={`status-badge ${order.status.toLowerCase()}`}>{order.status}</span>
                 </div>
                 <div className="order-info">
@@ -96,8 +98,8 @@ const FarmerOrders = () => {
                   <div className="order-details">
                     <p><strong>Quantity:</strong> {item?.quantity || 0}</p>
                     <p><strong>Total Price:</strong> ₹{
-                      (typeof product.price === 'number' && typeof item?.quantity === 'number')
-                        ? (product.price * item.quantity)
+                      (typeof displayProduct.price === 'number' && typeof item?.quantity === 'number')
+                        ? (displayProduct.price * item.quantity)
                         : (order.totalPrice ? order.totalPrice : 'N/A')
                     }</p>
                     <p><strong>Delivery Type:</strong> {order.deliveryType || 'N/A'}</p>

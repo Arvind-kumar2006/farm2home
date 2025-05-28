@@ -62,36 +62,41 @@ const OrderHistory = () => {
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
-                <tr key={order._id}>
-                  <td>{order.items[0].product.name}</td>
-                  <td>
-                    <img
-                      src={order.items[0].product.image || 'https://placehold.co/80x80'}
-                      alt={order.items[0].product.name}
-                      className="order-img"
-                    />
-                  </td>
-                  <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                  <td>{order.items[0].quantity}</td>
-                  <td>₹{
-                    order.totalPrice
-                      ? order.totalPrice.toFixed(2)
-                      : order.items.reduce(
-                          (sum, item) => sum + (item.product.price * item.quantity),
-                          0
-                        ).toFixed(2)
-                  }</td>
-                  <td>
-                    <span className={`status-badge ${order.status.toLowerCase()}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td>
-                    <button className="track-order-btn">Track</button>
-                  </td>
-                </tr>
-              ))}
+              {orders.map((order) => {
+                const item = order.items[0];
+                const product = item.product || {};
+                const snapshot = item.productSnapshot || {};
+                const displayProduct = (product && product.name) ? product : snapshot;
+                return (
+                  <tr key={order._id}>
+                    <td>{displayProduct.name || 'Product Deleted'}</td>
+                    <td>
+                      <img
+                        src={displayProduct.image || 'https://placehold.co/80x80'}
+                        alt={displayProduct.name || 'Product Deleted'}
+                        className="order-img"
+                      />
+                    </td>
+                    <td>{new Date(order.createdAt).toLocaleDateString()}</td>
+                    <td>{item.quantity}</td>
+                    <td>₹{
+                      order.totalPrice
+                        ? order.totalPrice.toFixed(2)
+                        : (displayProduct.price && item.quantity)
+                          ? (displayProduct.price * item.quantity).toFixed(2)
+                          : 'N/A'
+                    }</td>
+                    <td>
+                      <span className={`status-badge ${order.status.toLowerCase()}`}>
+                        {order.status}
+                      </span>
+                    </td>
+                    <td>
+                      <button className="track-order-btn">Track</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
